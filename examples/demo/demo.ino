@@ -15,35 +15,24 @@ void setup() {
   //  tm.displayHex(i,15-i);
   //  }
   Serial.println(Wire.getClock(), DEC);
+
+  tm.displayNumber(24000, 350, -1000, 10);
+  //Serial.println(tm.readButtons(),BIN);
+}
+
+void func1(uint8_t i) {
+  Serial.print("Key Pressed:");
+  Serial.println(i + 1);
+}
+
+void func2(uint8_t i) {
+  Serial.print("Key Released:");
+  Serial.println(i + 1);
+
 }
 
 void loop() {
 
-  tm.displayNumber(1000,1000,1000,1000);
-  //Serial.println(tm.readButtons(),BIN);
-  static uint32_t oldBtns = tm.readButtons();
-  uint32_t Btns = tm.readButtons();
-  uint32_t changes = (Btns ^ oldBtns);
-  if (changes) {
-    for (uint8_t i = 0; i < 32; i++) {
-      uint32_t mask = (0x00000001 << i);
-      if (mask & changes) {
-        if (Btns & mask) {
-          Serial.print("Key Pressed:");
-          Serial.println(i + 1);
-        }
-
-        else {
-          Serial.print("Key Released:");
-          Serial.println(i + 1);
-        }
-
-
-      }
-
-    }
-    oldBtns = Btns;
-
-  }
+  tm.buttonsCallbackFunc(func2, func1);
 
 }

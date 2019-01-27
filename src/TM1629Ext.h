@@ -3,8 +3,8 @@
   Danny Ayers (@danja), 2018.
   Apache 2 license.
 */
-#ifndef Tm1629Ext_h
-#define Tm1629Ext_h
+#ifndef TM1629Ext_h
+#define TM1629Ext_h
 
 #include "Arduino.h"
 #include "PCF8575.h" 
@@ -16,10 +16,10 @@
 
 #define BRIGHTNESS 0x80
 
-class Tm1629Ext
+class TM1629Ext
 {
   public:
-    Tm1629Ext(uint8_t strobe, uint8_t clock, uint8_t data);
+    TM1629Ext(uint8_t strobe, uint8_t clock, uint8_t data);
 
     void begin();
     void sendCommand(uint8_t value);
@@ -30,7 +30,7 @@ class Tm1629Ext
     void displayASCII(uint8_t position, uint8_t ascii);
     void displayHex(uint8_t position, uint8_t hex);
     void updateDisplay();
-    void displayNumber(uint8_t position, int32_t num);
+    void displayNumber(uint16_t alt, uint16_t spd, int16_t vs, uint16_t hdg);
 
   private:
     uint8_t displayCache[16];

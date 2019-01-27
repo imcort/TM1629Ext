@@ -3,7 +3,7 @@
 
 // I/O pins on the Arduino connected to strobe, clock, data
 // (power should go to 3.3v and GND)
-Tm1629Ext tm(8, 9, 10);
+TM1629Ext tm(8, 9, 10);
 
 void setup() {
   Serial.begin(115200);
@@ -19,7 +19,7 @@ void setup() {
 
 void loop() {
 
-  tm.displayText("Hello World");
+  tm.displayNumber(1000,1000,1000,1000);
   //Serial.println(tm.readButtons(),BIN);
   static uint32_t oldBtns = tm.readButtons();
   uint32_t Btns = tm.readButtons();
@@ -47,4 +47,3 @@ void loop() {
   }
 
 }
-

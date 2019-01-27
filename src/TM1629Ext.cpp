@@ -19,7 +19,7 @@
 // return chn;
 // }
 
-Tm1629Ext::Tm1629Ext(uint8_t strobe, uint8_t clock, uint8_t data) {
+TM1629Ext::TM1629Ext(uint8_t strobe, uint8_t clock, uint8_t data) {
   
   STROBE_IO = strobe;
   DATA_IO = data;
@@ -27,7 +27,7 @@ Tm1629Ext::Tm1629Ext(uint8_t strobe, uint8_t clock, uint8_t data) {
 
 }
 
-void Tm1629Ext::begin(){
+void TM1629Ext::begin(){
 
   expander.begin(0x20);
 
@@ -40,14 +40,14 @@ void Tm1629Ext::begin(){
 
 }
 
-void Tm1629Ext::sendCommand(uint8_t value)
+void TM1629Ext::sendCommand(uint8_t value)
 {
   expander.digitalWrite(STROBE_IO, LOW);
   expander.shiftOut(DATA_IO, CLOCK_IO, LSBFIRST, value);
   expander.digitalWrite(STROBE_IO, HIGH);
 }
 
-void Tm1629Ext::reset() {
+void TM1629Ext::reset() {
   sendCommand(WRITE_INC); // set auto increment mode
   expander.digitalWrite(STROBE_IO, LOW);
   expander.shiftOut(DATA_IO, CLOCK_IO, LSBFIRST, 0xc0);   // set starting address to 0
@@ -64,7 +64,7 @@ void Tm1629Ext::reset() {
   sendCommand(ACTIVATE);
 }
 
-uint32_t Tm1629Ext::readButtons()
+uint32_t TM1629Ext::readButtons()
 {
   uint32_t buttons = 0;
   expander.digitalWrite(STROBE_IO, LOW);
@@ -82,7 +82,7 @@ uint32_t Tm1629Ext::readButtons()
   return buttons;
 }
 
-void Tm1629Ext::displayText(String text) {
+void TM1629Ext::displayText(String text) {
   uint8_t length = text.length();
   if(length <= 16)
   {
@@ -95,12 +95,12 @@ void Tm1629Ext::displayText(String text) {
     
 }
 
-void Tm1629Ext::displaySS(uint8_t position, uint8_t value) { // call 7-segment
+void TM1629Ext::displaySS(uint8_t position, uint8_t value) { // call 7-segment
   displayCache[position] = value;//ReverseBits(value);
   updateDisplay();
 }
 
-void Tm1629Ext::updateDisplay(){   ///OWN
+void TM1629Ext::updateDisplay(){   ///OWN
 
   sendCommand(WRITE_INC);
   expander.digitalWrite(STROBE_IO, LOW);
@@ -124,39 +124,58 @@ void Tm1629Ext::updateDisplay(){   ///OWN
   sendCommand(ACTIVATE); // set auto increment mode
 }
 
-void Tm1629Ext::displayASCII(uint8_t position, uint8_t ascii) {
+void TM1629Ext::displayASCII(uint8_t position, uint8_t ascii) {
   displaySS(position, ss[ascii]);
 }
 
-void Tm1629Ext::displayHex(uint8_t position, uint8_t hex) {
+void TM1629Ext::displayHex(uint8_t position, uint8_t hex) {
   displaySS(position, hexss[hex]);
 }
 
-void Tm1629Ext::displayNumber(uint8_t position, int32_t num) {
-  switch(position){
-    case 0:
-      if(num > 999)
-        return;
-      displayHex(0,num/100);
-      displayHex(1,num/10%10);
-      displayHex(2,num/1%10);
-      break;
-    case 1:
-      if(num > 99999 || num < -9999)
-        return;
-      if(num < 0){
-        displayASCII(3,'-');
-        num = -num;
-      } 
-      else{
-        displayASCII(3,num/10000%10);
-      }
-      displayHex(4,num/1000%10);
-      displayHex(5,num/100%10);
-      displayHex(6,num/10%10);
-      displayHex(7,num/1%10);
-      break;
-    case 2:
-      break;
+void TM1629Ext::displayNumber(uint16_t alt, uint16_t spd, int16_t vs, uint16_t hdg) {
+
+  if(alt < 100000){
+
+    displayCache[0] = hexss[alt/10000];
+    displayCache[1] = hexss[alt/1000%10];
+    displayCache[2] = hexss[alt/100%10];
+    displayCache[3] = hexss[alt/10%10];
+    displayCache[4] = hexss[alt/1%10];
+
   }
+  if(spd < 1000){
+
+    displayCache[5] = hexss[spd/100];
+    displayCache[6] = hexss[spd/10%10];
+    displayCache[7] = hexss[spd/1%10];
+
+  }
+  if((vs > 0) && (vs < 10000)){
+
+    displayCache[8] = 0x00;
+    displayCache[9] = hexss[vs/1000];
+    displayCache[10] = hexss[vs/100%10];
+    displayCache[11] = hexss[vs/10%10];
+    displayCache[12] = hexss[vs/1%10];
+
+  }
+
+  if((vs < 0) && (vs > -10000)){
+
+    displayCache[8] = ss['-'];
+    displayCache[9] = hexss[-vs/1000];
+    displayCache[10] = hexss[-vs/100%10];
+    displayCache[11] = hexss[-vs/10%10];
+    displayCache[12] = hexss[-vs/1%10];
+
+  }
+  if(hdg < 1000){
+
+    displayCache[13] = hexss[hdg/100];
+    displayCache[14] = hexss[hdg/10%10];
+    displayCache[15] = hexss[hdg/1%10];
+
+  }
+  updateDisplay();
+
 }

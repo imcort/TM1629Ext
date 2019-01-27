@@ -38,6 +38,8 @@ void TM1629Ext::begin(){
   sendCommand(ACTIVATE);
   reset();
 
+  oldButtons = readButtons();
+
 }
 
 void TM1629Ext::sendCommand(uint8_t value)
@@ -177,5 +179,26 @@ void TM1629Ext::displayNumber(uint16_t alt, uint16_t spd, int16_t vs, uint16_t h
 
   }
   updateDisplay();
+
+}
+
+void TM1629Ext::buttonsCallbackFunc(void (*buttonUpFunc)(uint8_t), void (*buttonDownFunc)(uint8_t)){
+
+  uint32_t buttons = readButtons();
+  uint32_t changes = (buttons ^ oldButtons);
+  if (changes) {
+    for (uint8_t i = 0; i < 32; i++) {
+      uint32_t mask = (0x00000001 << i);
+      if (mask & changes) {
+        if (buttons & mask) {
+          buttonDownFunc(i+1);
+        }
+        else {
+          buttonUpFunc(i+1);
+        }
+      }
+    }
+    oldButtons = buttons;
+  }
 
 }

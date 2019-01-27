@@ -31,6 +31,7 @@ class TM1629Ext
     void displayHex(uint8_t position, uint8_t hex);
     void updateDisplay();
     void displayNumber(uint16_t alt, uint16_t spd, int16_t vs, uint16_t hdg);
+    void buttonsCallbackFunc(void (*buttonUpFunc)(uint8_t), void (*buttonDownFunc)(uint8_t));
 
   private:
     uint8_t displayCache[16];
@@ -38,6 +39,7 @@ class TM1629Ext
     uint8_t STROBE_IO;
     uint8_t DATA_IO;
     uint8_t CLOCK_IO;
+    uint32_t oldButtons;
 };
 
 // map of ASCII values to 7-segment
